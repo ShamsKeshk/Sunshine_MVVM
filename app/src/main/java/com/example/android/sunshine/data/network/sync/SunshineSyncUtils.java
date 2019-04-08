@@ -21,7 +21,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
-import com.example.android.sunshine.data.WeatherContract;
+import com.example.android.sunshine.data.network.SunshineFirebaseJobService;
+import com.example.android.sunshine.data.network.SunshineSyncIntentService;
 import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.Driver;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;

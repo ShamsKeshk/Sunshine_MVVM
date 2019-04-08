@@ -15,16 +15,14 @@
  */
 package com.example.android.sunshine.sync;
 
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.text.format.DateUtils;
 
 import com.example.android.sunshine.data.SunshinePreferences;
-import com.example.android.sunshine.data.WeatherContract;
-import com.example.android.sunshine.utilities.NetworkUtils;
+import com.example.android.sunshine.data.network.WeatherResponse;
+import com.example.android.sunshine.data.network.NetworkUtils;
 import com.example.android.sunshine.utilities.NotificationUtils;
-import com.example.android.sunshine.utilities.OpenWeatherJsonUtils;
+import com.example.android.sunshine.data.network.OpenWeatherJsonUtils;
 
 import java.net.URL;
 
@@ -52,8 +50,8 @@ public class SunshineSyncTask {
             String jsonWeatherResponse = NetworkUtils.getResponseFromHttpUrl(weatherRequestUrl);
 
             /* Parse the JSON into a list of weather values */
-            ContentValues[] weatherValues = OpenWeatherJsonUtils
-                    .getWeatherContentValuesFromJson(context, jsonWeatherResponse);
+            WeatherResponse weatherValues = OpenWeatherJsonUtils
+                    .parse(jsonWeatherResponse);
 
             /*
              * In cases where our JSON contained an error code, getWeatherContentValuesFromJson
@@ -61,20 +59,9 @@ public class SunshineSyncTask {
              * NullPointerExceptions being thrown. We also have no reason to insert fresh data if
              * there isn't any to insert.
              */
-            if (weatherValues != null && weatherValues.length != 0) {
+            if (weatherValues != null && weatherValues.getWeatherForecast().length != 0) {
                 /* Get a handle on the ContentResolver to delete and insert data */
-                ContentResolver sunshineContentResolver = context.getContentResolver();
 
-                /* Delete old weather data because we don't need to keep multiple days' data */
-                sunshineContentResolver.delete(
-                        WeatherContract.WeatherEntry.CONTENT_URI,
-                        null,
-                        null);
-
-                /* Insert our new weather data into Sunshine's ContentProvider */
-                sunshineContentResolver.bulkInsert(
-                        WeatherContract.WeatherEntry.CONTENT_URI,
-                        weatherValues);
 
                 /*
                  * Finally, after we insert data into the ContentProvider, determine whether or not

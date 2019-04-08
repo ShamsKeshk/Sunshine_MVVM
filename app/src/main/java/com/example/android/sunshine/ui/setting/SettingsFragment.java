@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.android.sunshine;
+package com.example.android.sunshine.ui;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -24,9 +24,9 @@ import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.PreferenceScreen;
 
-import com.example.android.sunshine.data.SunshinePreferences;
-import com.example.android.sunshine.data.WeatherContract;
-import com.example.android.sunshine.sync.SunshineSyncUtils;
+import com.example.android.sunshine.R;
+import com.example.android.sunshine.data.database.SunshinePreferences;
+import com.example.android.sunshine.data.network.sync.SunshineSyncUtils;
 
 /**
  * The SettingsFragment serves as the display for all of the user's settings. In Sunshine, the

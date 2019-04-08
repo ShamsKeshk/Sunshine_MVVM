@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.android.sunshine;
+package com.example.android.sunshine.ui;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -29,8 +29,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.example.android.sunshine.data.WeatherContract;
+import com.example.android.sunshine.R;
 import com.example.android.sunshine.databinding.ActivityDetailBinding;
+import com.example.android.sunshine.ui.SettingsActivity;
 import com.example.android.sunshine.utilities.SunshineDateUtils;
 import com.example.android.sunshine.utilities.SunshineWeatherUtils;
 
@@ -41,6 +42,7 @@ public class DetailActivity extends AppCompatActivity implements
      * In this Activity, you can share the selected day's forecast. No social sharing is complete
      * without using a hashtag. #BeTogetherNotTheSame
      */
+    public static final String EXTRA_WEATHER_ID_WHEN_NOTIFICATION_CLICKED = "weather_details_notification_id";
     private static final String FORECAST_SHARE_HASHTAG = " #SunshineApp";
 
     /*
