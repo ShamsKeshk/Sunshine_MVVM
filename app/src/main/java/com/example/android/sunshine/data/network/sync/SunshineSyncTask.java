@@ -23,10 +23,10 @@ import android.util.Log;
 import com.example.android.sunshine.AppExecutor;
 import com.example.android.sunshine.data.database.SunshinePreferences;
 import com.example.android.sunshine.data.database.WeatherEntry;
-import com.example.android.sunshine.data.network.WeatherResponse;
 import com.example.android.sunshine.data.network.NetworkUtils;
-import com.example.android.sunshine.utilities.NotificationUtils;
 import com.example.android.sunshine.data.network.OpenWeatherJsonUtils;
+import com.example.android.sunshine.data.network.WeatherResponse;
+import com.example.android.sunshine.utilities.NotificationUtils;
 
 import java.net.URL;
 

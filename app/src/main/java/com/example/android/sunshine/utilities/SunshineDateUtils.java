@@ -17,7 +17,6 @@ package com.example.android.sunshine.utilities;
 
 import android.content.Context;
 import android.text.format.DateUtils;
-import android.util.Log;
 
 import com.example.android.sunshine.R;
 

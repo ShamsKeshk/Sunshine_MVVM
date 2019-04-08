@@ -1,6 +1,5 @@
 package com.example.android.sunshine;
 
-import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
 

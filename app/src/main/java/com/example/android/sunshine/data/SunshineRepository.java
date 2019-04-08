@@ -2,7 +2,6 @@ package com.example.android.sunshine.data;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
-import android.print.PrinterId;
 import android.support.annotation.Nullable;
 
 import com.example.android.sunshine.AppExecutor;

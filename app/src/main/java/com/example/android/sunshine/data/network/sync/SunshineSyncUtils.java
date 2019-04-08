@@ -17,14 +17,11 @@ package com.example.android.sunshine.data.network.sync;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 
 import com.example.android.sunshine.AppExecutor;
 import com.example.android.sunshine.data.database.ListWeatherEntry;
 import com.example.android.sunshine.data.database.SunshineDatabase;
-import com.example.android.sunshine.data.database.WeatherEntry;
 import com.example.android.sunshine.data.network.SunshineFirebaseJobService;
 import com.example.android.sunshine.data.network.SunshineSyncIntentService;
 import com.example.android.sunshine.utilities.InjectorUtils;

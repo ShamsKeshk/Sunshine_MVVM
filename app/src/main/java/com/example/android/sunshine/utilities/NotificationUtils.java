@@ -12,11 +12,11 @@ import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 
 import com.example.android.sunshine.AppExecutor;
-import com.example.android.sunshine.ui.weather_detail.DetailActivity;
 import com.example.android.sunshine.R;
-import com.example.android.sunshine.data.database.SunshinePreferences;
 import com.example.android.sunshine.data.database.ListWeatherEntry;
 import com.example.android.sunshine.data.database.SunshineDatabase;
+import com.example.android.sunshine.data.database.SunshinePreferences;
+import com.example.android.sunshine.ui.weather_detail.DetailActivity;
 
 import java.util.Date;
 

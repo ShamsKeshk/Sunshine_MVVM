@@ -18,7 +18,6 @@ package com.example.android.sunshine.ui.setting;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.preference.CheckBoxPreference;
 import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.Preference;
@@ -26,11 +25,8 @@ import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.PreferenceScreen;
 
 import com.example.android.sunshine.R;
-import com.example.android.sunshine.data.database.SunshineDatabase;
 import com.example.android.sunshine.data.database.SunshinePreferences;
 import com.example.android.sunshine.data.network.WeatherNetworkDataSource;
-import com.example.android.sunshine.data.network.sync.SunshineSyncUtils;
-import com.example.android.sunshine.ui.weather_list.ForecastAdapter;
 import com.example.android.sunshine.ui.weather_list.MainActivity;
 import com.example.android.sunshine.utilities.InjectorUtils;
 
