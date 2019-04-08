@@ -6,4 +6,5 @@ Sunshine App Display Weather from Api and Use Android Architecture Component :
       * LiveData .
       * Executors .
       * Repository Design Pattern .
+      Shady
       
