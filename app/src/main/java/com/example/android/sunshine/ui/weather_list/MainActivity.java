@@ -18,6 +18,7 @@ package com.example.android.sunshine.ui.weather_list;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -41,7 +42,8 @@ import com.example.android.sunshine.utilities.InjectorUtils;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
-        ForecastAdapter.ForecastAdapterOnClickHandler {
+        ForecastAdapter.ForecastAdapterOnClickHandler
+        , SharedPreferences.OnSharedPreferenceChangeListener {
 
     private final String TAG = MainActivity.class.getSimpleName();
 
@@ -53,15 +55,11 @@ public class MainActivity extends AppCompatActivity implements
      * it is unique and consistent.
      */
 
-    private static ForecastAdapter mForecastAdapter;
+    private ForecastAdapter mForecastAdapter;
     private RecyclerView mRecyclerView;
     private int mPosition = RecyclerView.NO_POSITION;
 
     private ProgressBar mLoadingIndicator;
-
-    public static ForecastAdapter getmRecyclerView() {
-        return mForecastAdapter;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,6 +148,15 @@ public class MainActivity extends AppCompatActivity implements
             }
         });
 
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(getString(R.string.pref_units_key))) {
+            // units have changed. update lists of weather entries accordingly
+            //  activity.getContentResolver().notifyChange(WeatherContract.WeatherEntry.CONTENT_URI, null);
+            mForecastAdapter.notifyDataSetChanged();
+        }
     }
 
     /**

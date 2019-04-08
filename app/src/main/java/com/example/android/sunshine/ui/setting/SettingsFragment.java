@@ -107,7 +107,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
             // units have changed. update lists of weather entries accordingly
             //TODO When Comeback to main Activity data will changed Auto
           //  activity.getContentResolver().notifyChange(WeatherContract.WeatherEntry.CONTENT_URI, null);
-            MainActivity.getmRecyclerView().notifyDataSetChanged();
+
 
         }
         Preference preference = findPreference(key);
