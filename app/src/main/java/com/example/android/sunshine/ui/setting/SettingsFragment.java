@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.android.sunshine.ui;
+package com.example.android.sunshine.ui.setting;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.preference.CheckBoxPreference;
 import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.Preference;
@@ -25,8 +26,13 @@ import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.PreferenceScreen;
 
 import com.example.android.sunshine.R;
+import com.example.android.sunshine.data.database.SunshineDatabase;
 import com.example.android.sunshine.data.database.SunshinePreferences;
+import com.example.android.sunshine.data.network.WeatherNetworkDataSource;
 import com.example.android.sunshine.data.network.sync.SunshineSyncUtils;
+import com.example.android.sunshine.ui.weather_list.ForecastAdapter;
+import com.example.android.sunshine.ui.weather_list.MainActivity;
+import com.example.android.sunshine.utilities.InjectorUtils;
 
 /**
  * The SettingsFragment serves as the display for all of the user's settings. In Sunshine, the
@@ -98,14 +104,19 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
             // we've changed the location
             // Wipe out any potential PlacePicker latlng values so that we can use this text entry.
             SunshinePreferences.resetLocationCoordinates(activity);
-            SunshineSyncUtils.startImmediateSync(activity);
+            WeatherNetworkDataSource weatherNetworkDataSource = InjectorUtils.provideNetworkDataSource(getContext());
+            weatherNetworkDataSource.startFetchWeatherService();
+          //  SunshineSyncUtils.startImmediateSync(activity);
         } else if (key.equals(getString(R.string.pref_units_key))) {
             // units have changed. update lists of weather entries accordingly
-            activity.getContentResolver().notifyChange(WeatherContract.WeatherEntry.CONTENT_URI, null);
+            //TODO When Comeback to main Activity data will changed Auto
+          //  activity.getContentResolver().notifyChange(WeatherContract.WeatherEntry.CONTENT_URI, null);
+            MainActivity.getmRecyclerView().notifyDataSetChanged();
+
         }
         Preference preference = findPreference(key);
         if (null != preference) {
-            if (!(preference instanceof CheckBoxPreference)) {
+            if (!(preference instanceof CheckBoxPreference) ) {
                 setPreferenceSummary(preference, sharedPreferences.getString(key, ""));
             }
         }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.android.sunshine.sync;
+package com.example.android.sunshine.data.network.sync;
 
 import android.content.Context;
 import android.content.Intent;
@@ -21,8 +21,14 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
+import com.example.android.sunshine.AppExecutor;
+import com.example.android.sunshine.data.database.ListWeatherEntry;
+import com.example.android.sunshine.data.database.SunshineDatabase;
+import com.example.android.sunshine.data.database.WeatherEntry;
 import com.example.android.sunshine.data.network.SunshineFirebaseJobService;
 import com.example.android.sunshine.data.network.SunshineSyncIntentService;
+import com.example.android.sunshine.utilities.InjectorUtils;
+import com.example.android.sunshine.utilities.SunshineDateUtils;
 import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.Driver;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
@@ -31,6 +37,7 @@ import com.firebase.jobdispatcher.Job;
 import com.firebase.jobdispatcher.Lifetime;
 import com.firebase.jobdispatcher.Trigger;
 
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class SunshineSyncUtils {
@@ -47,12 +54,14 @@ public class SunshineSyncUtils {
 
     private static final String SUNSHINE_SYNC_TAG = "sunshine-sync";
 
+    public static final int NUM_DAYS = 14;
+
     /**
      * Schedules a repeating sync of Sunshine's weather data using FirebaseJobDispatcher.
      * @param context Context used to create the GooglePlayDriver that powers the
      *                FirebaseJobDispatcher
      */
-    static void scheduleFirebaseJobDispatcherSync(@NonNull final Context context) {
+    public static void scheduleFirebaseJobDispatcherSync(@NonNull final Context context) {
 
         Driver driver = new GooglePlayDriver(context);
         FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(driver);
@@ -107,7 +116,7 @@ public class SunshineSyncUtils {
      * @param context Context that will be passed to other methods and used to access the
      *                ContentResolver
      */
-    synchronized public static void initialize(@NonNull final Context context) {
+    synchronized public static void initialize(@NonNull final Context context, AppExecutor executor) {
 
         /*
          * Only perform initialization once per app lifetime. If initialization has already been
@@ -123,61 +132,35 @@ public class SunshineSyncUtils {
          */
         scheduleFirebaseJobDispatcherSync(context);
 
-        /*
-         * We need to check to see if our ContentProvider has data to display in our forecast
-         * list. However, performing a query on the main thread is a bad idea as this may
-         * cause our UI to lag. Therefore, we create a thread in which we will run the query
-         * to check the contents of our ContentProvider.
-         */
-        Thread checkForEmpty = new Thread(new Runnable() {
+         final SunshineDatabase sunshineDatabase = InjectorUtils.provideSunshineDatabase(context);
+     executor.getDiskIO().execute(new Runnable() {
             @Override
             public void run() {
-
                 /* URI for every row of weather data in our weather table*/
-                Uri forecastQueryUri = WeatherContract.WeatherEntry.CONTENT_URI;
+               ListWeatherEntry weatherEntry = sunshineDatabase
+                        .weatherDao().
+                               getLastWeatherForecasts(new Date(SunshineDateUtils.normalizeDate(System.currentTimeMillis())));
 
-                /*
-                 * Since this query is going to be used only as a check to see if we have any
-                 * data (rather than to display data), we just need to PROJECT the ID of each
-                 * row. In our queries where we display data, we need to PROJECT more columns
-                 * to determine what weather details need to be displayed.
-                 */
-                String[] projectionColumns = {WeatherContract.WeatherEntry._ID};
-                String selectionStatement = WeatherContract.WeatherEntry
-                        .getSqlSelectForTodayOnwards();
 
-                /* Here, we perform the query to check to see if we have any weather data */
-                Cursor cursor = context.getContentResolver().query(
-                        forecastQueryUri,
-                        projectionColumns,
-                        selectionStatement,
-                        null,
-                        null);
-                /*
-                 * A Cursor object can be null for various different reasons. A few are
-                 * listed below.
-                 *
-                 *   1) Invalid URI
-                 *   2) A certain ContentProvider's query method returns null
-                 *   3) A RemoteException was thrown.
-                 *
-                 * Bottom line, it is generally a good idea to check if a Cursor returned
-                 * from a ContentResolver is null.
-                 *
-                 * If the Cursor was null OR if it was empty, we need to sync immediately to
-                 * be able to display data to the user.
-                 */
-                if (null == cursor || cursor.getCount() == 0) {
+                if (null == weatherEntry ||weatherEntry.getId() <=  0) {
                     startImmediateSync(context);
                 }
 
-                /* Make sure to close the Cursor to avoid memory leaks! */
-                cursor.close();
+                if (isFetchNeeded(context)) {
+                    startImmediateSync(context);
+                }
+
             }
         });
 
-        /* Finally, once the thread is prepared, fire it off to perform our checks. */
-        checkForEmpty.start();
+
+    }
+
+    private static boolean isFetchNeeded(Context context) {
+        SunshineDatabase sunshineDatabase = InjectorUtils.provideSunshineDatabase(context);
+        Date today = SunshineDateUtils.getNormalizedUtcDateForToday();
+        int count = sunshineDatabase.weatherDao().countAllFutureWeather(today);
+        return (count < NUM_DAYS);
     }
 
     /**

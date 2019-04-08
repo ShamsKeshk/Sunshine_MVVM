@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.example.android.sunshine.ui.detail;
+package com.example.android.sunshine.ui.weather_detail;
 
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
-import com.example.android.sunshine.data.database.WeatherEntry;
 
 import com.example.android.sunshine.data.SunshineRepository;
+import com.example.android.sunshine.data.database.WeatherEntry;
 
 import java.util.Date;
 

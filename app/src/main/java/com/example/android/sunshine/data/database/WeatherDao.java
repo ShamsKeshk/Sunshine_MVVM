@@ -38,8 +38,11 @@ public interface WeatherDao {
      * @param date A {@link Date} from which to select all future weather
      * @return {@link LiveData} list of all {@link ListWeatherEntry} objects after date
      */
-    @Query("SELECT id, weatherIconId, date, min, max FROM weather WHERE date >= :date")
+    @Query("SELECT id, weatherIconId, date, min, max FROM weather WHERE date >= :date ORDER BY date ASC")
     LiveData<List<ListWeatherEntry>> getCurrentWeatherForecasts(Date date);
+
+    @Query("SELECT id, weatherIconId, date, min, max FROM weather WHERE date >= :date")
+    ListWeatherEntry getLastWeatherForecasts(Date date);
 
     /**
      * Selects all ids entries after a give date, inclusive. This is for easily seeing

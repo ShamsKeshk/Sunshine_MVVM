@@ -19,7 +19,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.example.android.sunshine.R;
-import com.example.android.sunshine.data.SunshinePreferences;
+import com.example.android.sunshine.data.database.SunshinePreferences;
 
 /**
  * Contains useful utilities for a weather app, such as conversion between Celsius and Fahrenheit,
@@ -97,7 +97,7 @@ public final class SunshineWeatherUtils {
      *
      * @return Wind String in the following form: "2 km/h SW"
      */
-    public static String getFormattedWind(Context context, float windSpeed, float degrees) {
+    public static String getFormattedWind(Context context, double windSpeed, double degrees) {
         int windFormat = R.string.format_wind_kmh;
 
         if (!SunshinePreferences.isMetric(context)) {

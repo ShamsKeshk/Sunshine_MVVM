@@ -22,7 +22,7 @@ import com.example.android.sunshine.data.database.WeatherEntry;
 /**
  * Weather response from the backend. Contains the weather forecasts.
  */
-class WeatherResponse {
+public class WeatherResponse {
 
     @NonNull
     private final WeatherEntry[] mWeatherForecast;

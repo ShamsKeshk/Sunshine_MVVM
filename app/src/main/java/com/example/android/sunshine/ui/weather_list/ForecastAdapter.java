@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.android.sunshine.ui;
+package com.example.android.sunshine.ui.weather_list;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -26,20 +26,25 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.android.sunshine.R;
+import com.example.android.sunshine.data.database.ListWeatherEntry;
 import com.example.android.sunshine.utilities.SunshineDateUtils;
 import com.example.android.sunshine.utilities.SunshineWeatherUtils;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * {@link ForecastAdapter} exposes a list of weather forecasts
  * from a {@link android.database.Cursor} to a {@link android.support.v7.widget.RecyclerView}.
  */
-class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastAdapterViewHolder> {
+public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastAdapterViewHolder> {
 
     private static final int VIEW_TYPE_TODAY = 0;
     private static final int VIEW_TYPE_FUTURE_DAY = 1;
 
     /* The context we use to utility methods, app resources and layout inflaters */
     private final Context mContext;
+    private List<ListWeatherEntry> listWeatherEntries;
 
     /*
      * Below, we've defined an interface to handle clicks on items within this Adapter. In the
@@ -63,8 +68,6 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastAdapt
      * boolean resources.
      */
     private boolean mUseTodayLayout;
-
-    private Cursor mCursor;
 
     /**
      * Creates a ForecastAdapter.
@@ -130,12 +133,13 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastAdapt
      */
     @Override
     public void onBindViewHolder(ForecastAdapterViewHolder forecastAdapterViewHolder, int position) {
-        mCursor.moveToPosition(position);
+
+        ListWeatherEntry listWeatherEntry = getItemAtPosition(position);
 
         /****************
          * Weather Icon *
          ****************/
-        int weatherId = mCursor.getInt(MainActivity.INDEX_WEATHER_CONDITION_ID);
+        int weatherId = listWeatherEntry.getWeatherIconId();
         int weatherImageId;
 
         int viewType = getItemViewType(position);
@@ -157,12 +161,11 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastAdapt
         }
 
         forecastAdapterViewHolder.iconView.setImageResource(weatherImageId);
-
         /****************
          * Weather Date *
          ****************/
          /* Read date from the cursor */
-        long dateInMillis = mCursor.getLong(MainActivity.INDEX_WEATHER_DATE);
+        long dateInMillis = toTimestamp(listWeatherEntry.getDate());
          /* Get human readable string using our utility method */
         String dateString = SunshineDateUtils.getFriendlyDateString(mContext, dateInMillis, false);
 
@@ -184,7 +187,7 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastAdapt
          * High (max) temperature *
          **************************/
          /* Read high temperature from the cursor (in degrees celsius) */
-        double highInCelsius = mCursor.getDouble(MainActivity.INDEX_WEATHER_MAX_TEMP);
+        double highInCelsius = listWeatherEntry.getMax();
          /*
           * If the user's preference for weather is fahrenheit, formatTemperature will convert
           * the temperature. This method will also append either °C or °F to the temperature
@@ -202,7 +205,7 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastAdapt
          * Low (min) temperature *
          *************************/
          /* Read low temperature from the cursor (in degrees celsius) */
-        double lowInCelsius = mCursor.getDouble(MainActivity.INDEX_WEATHER_MIN_TEMP);
+        double lowInCelsius = listWeatherEntry.getMin();
          /*
           * If the user's preference for weather is fahrenheit, formatTemperature will convert
           * the temperature. This method will also append either °C or °F to the temperature
@@ -222,10 +225,19 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastAdapt
      *
      * @return The number of items available in our forecast
      */
+
+    public static Long toTimestamp(Date date) {
+        return date == null ? null : date.getTime();
+    }
+
     @Override
     public int getItemCount() {
-        if (null == mCursor) return 0;
-        return mCursor.getCount();
+        if (null == listWeatherEntries) return 0;
+        return listWeatherEntries.size();
+    }
+
+    public ListWeatherEntry getItemAtPosition(int position){
+        return listWeatherEntries.get(position);
     }
 
     /**
@@ -247,18 +259,19 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastAdapt
         }
     }
 
-    /**
-     * Swaps the cursor used by the ForecastAdapter for its weather data. This method is called by
-     * MainActivity after a load has finished, as well as when the Loader responsible for loading
-     * the weather data is reset. When this method is called, we assume we have a completely new
-     * set of data, so we call notifyDataSetChanged to tell the RecyclerView to update.
-     *
-     * @param newCursor the new cursor to use as ForecastAdapter's data source
-     */
-    void swapCursor(Cursor newCursor) {
-        mCursor = newCursor;
+    public List<ListWeatherEntry> getListWeatherEntries() {
+        return listWeatherEntries;
+    }
+
+    public void setListWeatherEntries(List<ListWeatherEntry> listWeatherEntries) {
+        this.listWeatherEntries = listWeatherEntries;
         notifyDataSetChanged();
     }
+
+    public void notifyDataSetChangedOnSharedPreference() {
+        notifyDataSetChanged();
+    }
+
 
     /**
      * A ViewHolder is a required part of the pattern for RecyclerViews. It mostly behaves as
@@ -295,8 +308,8 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastAdapt
         @Override
         public void onClick(View v) {
             int adapterPosition = getAdapterPosition();
-            mCursor.moveToPosition(adapterPosition);
-            long dateInMillis = mCursor.getLong(MainActivity.INDEX_WEATHER_DATE);
+
+            long dateInMillis = listWeatherEntries.get(adapterPosition).getDate().getTime();
             mClickHandler.onClick(dateInMillis);
         }
     }

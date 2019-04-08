@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.sunshine.ui.detail;
+package com.example.android.sunshine.ui.weather_detail;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModel;

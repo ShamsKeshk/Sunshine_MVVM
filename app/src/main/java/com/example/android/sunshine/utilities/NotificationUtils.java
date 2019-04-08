@@ -5,39 +5,22 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 
-import com.example.android.sunshine.DetailActivity;
+import com.example.android.sunshine.AppExecutor;
+import com.example.android.sunshine.ui.weather_detail.DetailActivity;
 import com.example.android.sunshine.R;
-import com.example.android.sunshine.data.SunshinePreferences;
-import com.example.android.sunshine.data.WeatherContract;
+import com.example.android.sunshine.data.database.SunshinePreferences;
+import com.example.android.sunshine.data.database.ListWeatherEntry;
+import com.example.android.sunshine.data.database.SunshineDatabase;
+
+import java.util.Date;
 
 public class NotificationUtils {
-
-    /*
-     * The columns of data that we are interested in displaying within our notification to let
-     * the user know there is new weather data available.
-     */
-    public static final String[] WEATHER_NOTIFICATION_PROJECTION = {
-            WeatherContract.WeatherEntry.COLUMN_WEATHER_ID,
-            WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
-            WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
-    };
-
-    /*
-     * We store the indices of the values in the array of Strings above to more quickly be able
-     * to access the data from our query. If the order of the Strings above changes, these
-     * indices must be adjusted to match the order of the Strings.
-     */
-    public static final int INDEX_WEATHER_ID = 0;
-    public static final int INDEX_MAX_TEMP = 1;
-    public static final int INDEX_MIN_TEMP = 2;
 
     /*
      * This notification ID can be used to access our notification after we've displayed it. This
@@ -54,30 +37,29 @@ public class NotificationUtils {
     public static void notifyUserOfNewWeather(Context context) {
 
         /* Build the URI for today's weather in order to show up to date data in notification */
-        Uri todaysWeatherUri = WeatherContract.WeatherEntry
-                .buildWeatherUriWithDate(SunshineDateUtils.normalizeDate(System.currentTimeMillis()));
+        AppExecutor appExecutor = AppExecutor.getInstance();
+        final SunshineDatabase sunshineDatabase = SunshineDatabase.getInstance(context);
+        final ListWeatherEntry[] listWeatherEntry = new ListWeatherEntry[1];
+        appExecutor.getDiskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+             listWeatherEntry[0] = sunshineDatabase.
+                     weatherDao().
+                     getLastWeatherForecasts(new Date(SunshineDateUtils.normalizeDate(System.currentTimeMillis())));
 
-        /*
-         * The MAIN_FORECAST_PROJECTION array passed in as the second parameter is defined in our WeatherContract
-         * class and is used to limit the columns returned in our cursor.
-         */
-        Cursor todayWeatherCursor = context.getContentResolver().query(
-                todaysWeatherUri,
-                WEATHER_NOTIFICATION_PROJECTION,
-                null,
-                null,
-                null);
-
+            }
+        });
         /*
          * If todayWeatherCursor is empty, moveToFirst will return false. If our cursor is not
          * empty, we want to show the notification.
          */
-        if (todayWeatherCursor.moveToFirst()) {
+        if (listWeatherEntry[0] != null) {
 
             /* Weather ID as returned by API, used to identify the icon to be used */
-            int weatherId = todayWeatherCursor.getInt(INDEX_WEATHER_ID);
-            double high = todayWeatherCursor.getDouble(INDEX_MAX_TEMP);
-            double low = todayWeatherCursor.getDouble(INDEX_MIN_TEMP);
+            int wId = listWeatherEntry[0].getId();
+            int weatherId = listWeatherEntry[0].getWeatherIconId();
+            double high = listWeatherEntry[0].getMax();
+            double low = listWeatherEntry[0].getMin();
 
             Resources resources = context.getResources();
             int largeArtResourceId = SunshineWeatherUtils
@@ -115,7 +97,7 @@ public class NotificationUtils {
              * we want to open Sunshine to the DetailActivity to display the newly updated weather.
              */
             Intent detailIntentForToday = new Intent(context, DetailActivity.class);
-            detailIntentForToday.setData(todaysWeatherUri);
+            detailIntentForToday.putExtra(DetailActivity.EXTRA_WEATHER_ID_WHEN_NOTIFICATION_CLICKED,wId);
 
             TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(context);
             taskStackBuilder.addNextIntentWithParentStack(detailIntentForToday);
@@ -138,7 +120,6 @@ public class NotificationUtils {
         }
 
         /* Always close your cursor when you're done with it to avoid wasting resources. */
-        todayWeatherCursor.close();
     }
 
     /**
